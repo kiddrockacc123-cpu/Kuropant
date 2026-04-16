@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detail Anime - KUROPANT</title>
+
+<style>
+
+/* IMPORT FONT */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Noto+Sans+JP&display=swap');
+
+/* VARIABLE BACKGROUND (MUDAH DIGANTI) */
+:root {
+    --bg-image: url('hrt.jpg');
+}
+
+/* BODY */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* OVERLAY GELAP */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: -1;
+}
+
+/* HEADER */
+header {
+    background: #111;
+    padding: 15px;
+    border-bottom: 2px solid #00c6ff;
+}
+
+/* LOGO */
+.logo {
+    text-decoration: none;
+}
+
+.logo-bg {
+    display: inline-block;
+    background: #156aa3;
+    padding: 15px 30px;
+    border-radius: 30px 10px 30px 10px;
+    transform: skew(-10deg);
+}
+
+.logo-text {
+    font-family: Broadway, 'Poppins', sans-serif;
+    font-size: 26px;
+    font-weight: bold;
+    color: black;
+    transform: skew(10deg);
+}
+
+.logo-sub {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    color: black;
+    transform: skew(10deg);
+}
+
+/* CONTAINER */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* BACK */
+.back {
+    color: #00c6ff;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+/* BOX DETAIL */
+.detail-box {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+}
+
+/* COVER */
+.cover {
+    width: 180px;
+    height: 250px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(44, 30, 173, 0.7);
+}
+
+/* INFO */
+.info {
+    flex: 1;
+}
+
+.info h1 {
+    color: #2d2da3;
+}
+
+/* META */
+.meta p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* SINOPSIS */
+.info h2 {
+    margin-top: 10px;
+    color: #00c6ff;
+}
+
+.desc {
+    line-height: 1.6;
+    color: #ddd;
+}
+
+/* EPISODE */
+.episode {
+    margin-top: 20px;
+    background: rgba(0,0,0,0.6);
+    border-left: 3px solid #00c6ff;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.episode h3 {
+    cursor: pointer;
+}
+
+/* DOWNLOAD */
+.download {
+    display: none;
+    margin-top: 10px;
+}
+
+.download a {
+    display: block;
+    color: #00c6ff;
+    text-decoration: none;
+    margin: 4px 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .detail-box {
+        flex-direction: column;
+    }
+
+    .cover {
+        width: 100%;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <a href="index.html" class="logo">
+        <div class="logo-bg">
+            <div class="logo-text">KUROPANT</div>
+            <div class="logo-sub">アニメダウンロード</div>
+        </div>
+    </a>
+</header>
+
+<div class="container">
+
+    <div class="back" onclick="history.back()">⬅ Kembali</div>
+
+    <!-- DETAIL -->
+    <div class="detail-box">
+
+        <img id="img" class="cover">
+
+        <div class="info">
+            <h1 id="title">Loading...</h1>
+
+            <div class="meta">
+                <p><b>Status:</b> <span id="status">-</span></p>
+                <p><b>Episode:</b> <span id="episode">-</span></p>
+                <p><b>Score:</b> <span id="score">-</span></p>
+            </div>
+
+            <h2>Sinopsis</h2>
+            <p id="desc" class="desc"></p>
+        </div>
+
+    </div>
+
+    <!-- EPISODE -->
+    <div class="episode">
+        <h3 onclick="toggle(this)">Episode 1 +</h3>
+        <div class="download">
+            <b>360p</b>
+            <a href="#">AceFile</a>
+            <a href="#">GoFile</a>
+
+            <b>480p</b>
+            <a href="#">AceFile</a>
+            <a href="#">GoFile</a>
+
+            <b>720p</b>
+            <a href="#">AceFile</a>
+            <a href="#">GoFile</a>
+
+            <b>1080p</b>
+            <a href="#">AceFile</a>
+            <a href="#">GoFile</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+// ambil ID dari URL
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+// ambil data dari API
+async function getDetail() {
+    try {
+        const res = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+        const data = await res.json();
+        const anime = data.data;
+
+        document.getElementById("title").innerText = anime.title;
+        document.getElementById("img").src = anime.images.jpg.image_url;
+        document.getElementById("desc").innerText = anime.synopsis || "Tidak ada sinopsis.";
+
+        document.getElementById("status").innerText = anime.status;
+        document.getElementById("episode").innerText = anime.episodes || "?";
+        document.getElementById("score").innerText = anime.score || "-";
+
+    } catch {
+        document.getElementById("title").innerText = "Gagal load data";
+    }
+}
+
+// toggle download
+function toggle(el) {
+    const box = el.nextElementSibling;
+    box.style.display = box.style.display === "block" ? "none" : "block";
+}
+
+// load
+getDetail();
+
+</script>
+
+</body>
+</html>

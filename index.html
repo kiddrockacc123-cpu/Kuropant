@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id">
+    
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KUROPANT</title>
+
+<style>
+
+/* IMPORT FONT */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Noto+Sans+JP&display=swap');
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: url('hrt.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+}
+
+/* HEADER */
+header {
+    background: #111;
+    padding: 15px;
+    border-bottom: 2px solid #00c6ff;
+}
+
+/* LOGO */
+.logo {
+    text-decoration: none;
+}
+
+/* BACKGROUND BRUSH */
+.logo-bg {
+    display: inline-block;
+    background: #156aa3;
+    padding: 15px 30px;
+    border-radius: 30px 10px 30px 10px;
+    transform: skew(-10deg);
+}
+
+/* TEKS UTAMA (BROADWAY) */
+.logo-text {
+    font-family: Broadway, 'Poppins', sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: black;
+    transform: skew(10deg);
+}
+
+/* SUB TEKS JEPANG */
+.logo-sub {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    color: black;
+    margin-top: 5px;
+    transform: skew(10deg);
+}
+
+/* HOVER LOGO */
+.logo-bg:hover {
+    opacity: 0.85;
+}
+
+/* SEARCH */
+.search-box input {
+    margin-top: 10px;
+    padding: 8px;
+    width: 250px;
+    border-radius: 5px;
+    border: none;
+}
+
+/* CONTAINER */
+.container {
+    padding: 20px;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+/* CARD */
+.card {
+    background: #161616;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.card h3 {
+    font-size: 13px;
+    padding: 10px;
+}
+
+/* BADGE */
+.badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: #00c6ff;
+    padding: 4px;
+    font-size: 11px;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #111;
+    margin-top: 20px;
+}
+
+/* MODAL DETAIL */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+}
+
+.modal-content {
+    background: #1a1a1a;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.modal img {
+    width: 100%;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<header>
+
+    <a href="index.html" class="logo">
+        <div class="logo-bg">
+            <div class="logo-text">KUROPANT </div>
+            <div class="logo-sub">アニメダウンロード</div>
+        </div>
+    </a>
+
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Cari anime...">
+    </div>
+
+</header>
+</header>
+
+<div class="container">
+    <h2>On-going Anime</h2>
+    <div class="grid" id="animeList"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">✖</span>
+        <img id="detailImg">
+        <h2 id="detailTitle"></h2>
+        <p id="detailInfo"></p>
+        <p id="detailDesc"></p>
+    </div>
+</div>
+
+<script>
+const animeList = document.getElementById("animeList");
+const searchInput = document.getElementById("search");
+
+let animeData = [];
+
+// 🔥 ON-GOING ANIME (season sekarang)
+async function getAnime() {
+    try {
+        animeList.innerHTML = "<p>Loading...</p>";
+
+        const res = await fetch("https://api.jikan.moe/v4/seasons/now");
+        const data = await res.json();
+
+        animeData = data.data;
+        displayAnime(animeData);
+    } catch (err) {
+        animeList.innerHTML = "<p>Gagal load 😢</p>";
+    }
+}
+
+// 🔥 TAMPILKAN
+function displayAnime(list) {
+    animeList.innerHTML = "";
+
+    list.forEach(anime => {
+        animeList.innerHTML += `
+                <div class="card" onclick="goDetail(${anime.mal_id})">
+                <div class="badge">Ep ${anime.episodes || "?"}</div>
+                <img src="${anime.images.jpg.image_url}">
+                <h3>${anime.title}</h3>
+            </div>
+        `;
+    });
+}
+
+// 🔍 SEARCH
+searchInput.addEventListener("keyup", () => {
+    const keyword = searchInput.value.toLowerCase();
+    const filtered = animeData.filter(a =>
+        a.title.toLowerCase().includes(keyword)
+    );
+    displayAnime(filtered);
+});
+
+// 🔥 DETAIL MODAL
+function showDetail(anime) {
+    document.getElementById("modal").style.display = "block";
+    document.getElementById("detailImg").src = anime.images.jpg.image_url;
+    document.getElementById("detailTitle").innerText = anime.title;
+    document.getElementById("detailInfo").innerText =
+        "Score: " + (anime.score || "-") + " | Episode: " + (anime.episodes || "?");
+    document.getElementById("detailDesc").innerText = anime.synopsis || "Tidak ada deskripsi";
+}
+
+// CLOSE
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+
+// LOAD
+getAnime();
+</script>
+<script>
+
+// fungsi tampil anime
+function displayAnime(list) {
+    animeList.innerHTML = "";
+
+    list.forEach(anime => {
+        animeList.innerHTML += `
+            <div class="card" onclick="goDetail(${anime.mal_id})">
+                <img src="${anime.images.jpg.image_url}">
+                <h3>${anime.title}</h3>
+            </div>
+        `;
+    });
+}
+
+// 🔥 TAMBAHKAN DI SINI
+function goDetail(id) {
+    window.location.href = "detail.html?id=" + id;
+}
+
+// ambil data anime
+async function getAnime() {
+    const res = await fetch("https://api.jikan.moe/v4/seasons/now");
+    const data = await res.json();
+    displayAnime(data.data);
+}
+
+// LOAD
+getAnime();
+
+</script>
+</body>
+</html>
